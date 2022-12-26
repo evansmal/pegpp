@@ -1,45 +1,7 @@
-#include <functional>
-#include <sstream>
-#include <stdexcept>
-#include <string>
-#include <variant>
 
 #include <iostream>
 
-template <typename T>
-struct ParseSuccess
-{
-    T value;
-    std::string rest;
-};
-
-struct ParseFailure
-{
-    std::string message;
-};
-
-template <typename T>
-using ParseResult = std::variant<ParseSuccess<T>, ParseFailure>;
-
-template <typename T>
-using Parser = std::function<ParseResult<T>(const std::string &)>;
-
-Parser<char> pchar(char c)
-{
-    return [c](const std::string &input) {
-        if (input[0] == c)
-        {
-            return ParseResult<char>(
-                ParseSuccess<char>{char(input[0]), {input.cbegin() + 1, input.cend()}});
-        }
-        else
-        {
-            std::stringstream ss;
-            ss << "Expected '" << int(c) << "' but got '" << input[0] << "'";
-            return ParseResult<char>(ParseFailure{ss.str()});
-        }
-    };
-}
+#include "ccombinators.h"
 
 template <typename T>
 void Print(const ParseResult<T> &result)
@@ -60,65 +22,10 @@ void Print(const ParseResult<T> &result)
     }
 }
 
-template <typename T>
-Parser<T> AndThen(const Parser<T> &a, const Parser<T> &b)
-{
-    return [&a, &b](const std::string &input) {
-        const auto result = a(input);
-        if (std::holds_alternative<ParseSuccess<T>>(result))
-        {
-            const auto &succ = std::get<ParseSuccess<T>>(result);
-            return b(succ.rest);
-        }
-        else
-        {
-            return ParseResult<T>(result);
-        }
-    };
-}
-
-template <typename T>
-Parser<T> OrElse(const Parser<T> &a, const Parser<T> &b)
-{
-    return [&a, &b](const std::string &input) {
-        auto result = a(input);
-        if (std::holds_alternative<ParseSuccess<T>>(result))
-        {
-            return result;
-        }
-        else
-        {
-            return ParseResult<T>(b(input));
-        }
-    };
-}
-
-template <typename T>
-Parser<T> AnyOf(const std::vector<Parser<T>> &choices)
-{
-    return [choices](const std::string &input) {
-        for (const auto &parser : choices)
-        {
-            auto result = parser(input);
-            if (std::holds_alternative<ParseSuccess<T>>(result))
-            {
-                return result;
-            }
-        }
-        return ParseResult<T>(ParseFailure{"Could not parse any choices"});
-    };
-}
-
-template <typename T>
-Parser<T> Map(const Parser<T> &parser)
-{
-    return [&parser](const std::string &input) {};
-}
-
 int main()
 {
-    const auto parser_a = pchar('a');
-    const auto parser_b = pchar('b');
+    const auto parser_a = Literal('a');
+    const auto parser_b = Literal('b');
 
     const auto x = parser_a("abc");
     const auto y = parser_a("bcv");
@@ -149,8 +56,8 @@ int main()
     Print(parser_f("bbx"));
 
     const auto parse_digit =
-        AnyOf<char>({pchar('1'), pchar('2'), pchar('3'), pchar('4'), pchar('5'), pchar('6'),
-                     pchar('7'), pchar('8'), pchar('9'), pchar('0')});
+        AnyOf<char>({Literal('1'), Literal('2'), Literal('3'), Literal('4'), Literal('5'),
+                     Literal('6'), Literal('7'), Literal('8'), Literal('9'), Literal('0')});
 
     Print(parse_digit("0A"));
     Print(parse_digit("9A"));
