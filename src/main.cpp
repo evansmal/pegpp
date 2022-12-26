@@ -55,12 +55,18 @@ int main()
 
     Print(parser_f("bbx"));
 
-    const auto parse_digit =
-        AnyOf<char>({Literal('1'), Literal('2'), Literal('3'), Literal('4'), Literal('5'),
-                     Literal('6'), Literal('7'), Literal('8'), Literal('9'), Literal('0')});
+    Print(Digit()("P0"));
+    Print(Digit()("0A"));
+    Print(Digit()("9A"));
 
-    Print(parse_digit("0A"));
-    Print(parse_digit("9A"));
+    const std::function<int(char)> ToInt = [](char c) {
+        const std::string d = {c};
+        return std::stoi(d.c_str());
+    };
+    const Parser<int> parser_g = Map(Digit(), ToInt);
+    Print(Digit()("7"));
+    Print(Digit()("1"));
+    Print(Digit()("A"));
 
     return 0;
 }

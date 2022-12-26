@@ -90,8 +90,25 @@ Parser<T> AnyOf(const std::vector<Parser<T>> &choices)
     };
 }
 
-template <typename T>
-Parser<T> Map(const Parser<T> &parser)
+template <typename T, typename U>
+Parser<U> Map(const Parser<T> &parser, const std::function<U(T)> &f)
 {
-    return [&parser](const std::string &input) {};
+    return [&parser, &f](const std::string &input) {
+        const auto result = parser(input);
+        if (std::holds_alternative<ParseSuccess<T>>(result))
+        {
+            const auto &succ = std::get<ParseSuccess<T>>(result);
+            return ParseResult<U>{ParseSuccess<U>{f(succ.value), succ.rest}};
+        }
+        else
+        {
+            return ParseResult<U>(ParseFailure{});
+        }
+    };
+}
+
+Parser<char> Digit()
+{
+    return AnyOf<char>({Literal('1'), Literal('2'), Literal('3'), Literal('4'), Literal('5'),
+                        Literal('6'), Literal('7'), Literal('8'), Literal('9'), Literal('0')});
 }
