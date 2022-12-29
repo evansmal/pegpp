@@ -79,3 +79,35 @@ TEST_CASE("OrElse", "[OrElse]")
         REQUIRE(UnwrapResult(parser("321")) == false);
     }
 }
+
+TEST_CASE("AndThen", "[AndThen]")
+{
+    SECTION("Handle single values")
+    {
+        const auto parser = AndThen(Literal('a'), Literal('b'));
+        const std::tuple<char, char> result = UnwrapValue(parser("ab"));
+        REQUIRE(std::get<0>(result) == 'a');
+        REQUIRE(std::get<1>(result) == 'b');
+    }
+    SECTION("Fail to parse")
+    {
+        const auto parser = AndThen(Literal('a'), Literal('b'));
+        REQUIRE(UnwrapResult(parser("qwert")) == false);
+    }
+}
+
+TEST_CASE("Parse single digits", "[Digit]")
+{
+    SECTION("Handle single values")
+    {
+        REQUIRE(UnwrapValue(Digit()("0")) == '0');
+        REQUIRE(UnwrapValue(Digit()("123")) == '1');
+        REQUIRE(UnwrapValue(Digit()("321")) == '3');
+    }
+    SECTION("Fail to parse")
+    {
+        REQUIRE(UnwrapResult(Digit()("A")) == false);
+        REQUIRE(UnwrapResult(Digit()("B")) == false);
+        REQUIRE(UnwrapResult(Digit()("{}{}{}")) == false);
+    }
+}
