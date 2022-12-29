@@ -88,7 +88,7 @@ Parser<T> OrElse(const Parser<T> &a, const Parser<T> &b)
 }
 
 template <typename T>
-Parser<T> AnyOf(const std::vector<Parser<T>> &choices)
+Parser<T> AnyOf(std::vector<Parser<T>> choices)
 {
     return [choices](const std::string &input) {
         for (const auto &parser : choices)

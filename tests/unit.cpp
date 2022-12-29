@@ -96,6 +96,23 @@ TEST_CASE("AndThen", "[AndThen]")
     }
 }
 
+TEST_CASE("AnyOf", "[AnyOf]")
+{
+    SECTION("Handle single values")
+    {
+        const auto parser = AnyOf<char>({Literal('a'), Literal('b')});
+        REQUIRE(UnwrapValue(parser("az")) == 'a');
+        REQUIRE(UnwrapValue(parser("bz")) == 'b');
+    }
+    SECTION("Fail to parse")
+    {
+        const auto parser = AnyOf<char>({Literal('a'), Literal('b')});
+        REQUIRE(UnwrapResult(parser("ca")) == false);
+        REQUIRE(UnwrapResult(parser("cb")) == false);
+        REQUIRE(UnwrapResult(parser("xxx")) == false);
+    }
+}
+
 TEST_CASE("Parse single digits", "[Digit]")
 {
     SECTION("Handle single values")
