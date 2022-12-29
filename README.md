@@ -1,6 +1,6 @@
 # ccombinators
 
-A parser combinators library written in C++17. This project is a work-in-progress.
+A parser combinators library written in C++20. This project is a work-in-progress.
 
 # Getting started
 
