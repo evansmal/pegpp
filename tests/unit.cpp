@@ -111,3 +111,16 @@ TEST_CASE("Parse single digits", "[Digit]")
         REQUIRE(UnwrapResult(Digit()("{}{}{}")) == false);
     }
 }
+
+TEST_CASE("Map parsers", "[Map]")
+{
+    SECTION("Handle single values")
+    {
+        const std::function<int(Tuple<char, char>)> f = [](Tuple<char, char> v) {
+            const auto str = std::string({std::get<0>(v), std::get<1>(v)});
+            return std::stoi(str.c_str());
+        };
+        const auto parser = Map(AndThen(Literal('1'), Literal('2')), f);
+        REQUIRE(UnwrapValue(parser("12")) == 12);
+    }
+}
