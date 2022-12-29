@@ -24,6 +24,9 @@ using ParseResult = std::variant<ParseSuccess<T>, ParseFailure>;
 template <typename T>
 using Parser = std::function<ParseResult<T>(const std::string &)>;
 
+template <typename T, typename U>
+using Tuple = std::tuple<T, U>;
+
 Parser<char> Literal(char c)
 {
     return [c](const std::string &input) {
@@ -41,19 +44,29 @@ Parser<char> Literal(char c)
     };
 }
 
-template <typename T>
-Parser<T> AndThen(const Parser<T> &a, const Parser<T> &b)
+template <typename T, typename U>
+Parser<Tuple<T, U>> AndThen(const Parser<T> &a, const Parser<U> &b)
 {
     return [&a, &b](const std::string &input) {
-        const auto result = a(input);
-        if (std::holds_alternative<ParseSuccess<T>>(result))
+        const auto a_result = a(input);
+        if (std::holds_alternative<ParseSuccess<T>>(a_result))
         {
-            const auto &succ = std::get<ParseSuccess<T>>(result);
-            return b(succ.rest);
+            const auto &fst = std::get<ParseSuccess<T>>(a_result);
+            const auto b_result = b(fst.rest);
+            if (std::holds_alternative<ParseSuccess<U>>(b_result))
+            {
+                const ParseSuccess<U> &sec = std::get<ParseSuccess<U>>(b_result);
+                const auto value = std::make_tuple(fst.value, sec.value);
+                return ParseResult<Tuple<T, U>>(ParseSuccess{value, sec.rest});
+            }
+            else
+            {
+                return ParseResult<Tuple<T, U>>(ParseFailure{"Unable to parse tuple"});
+            }
         }
         else
         {
-            return ParseResult<T>(result);
+            return ParseResult<Tuple<T, U>>(ParseFailure{"Unable to parse typle"});
         }
     };
 }
