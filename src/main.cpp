@@ -66,6 +66,14 @@ int main()
     Print(parser_c("bbc"));
 
     Print(Digit()("123"));
+    Print(Digit()("321"));
+
+    const std::function<int(Tuple<char, char>)> f = [](Tuple<char, char> v) {
+        const auto str = std::string({std::get<0>(v), std::get<1>(v)});
+        return std::stoi(str.c_str());
+    };
+    const auto seq_digit = Map(AndThen(Literal('1'), Literal('2')), f);
+    Print(seq_digit("1234"));
 
     return 0;
 }

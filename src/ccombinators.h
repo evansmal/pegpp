@@ -47,26 +47,26 @@ Parser<char> Literal(char c)
 template <typename T, typename U>
 Parser<Tuple<T, U>> AndThen(const Parser<T> &a, const Parser<U> &b)
 {
-    return [&a, &b](const std::string &input) {
+    return [a, b](const std::string &input) {
         const auto a_result = a(input);
         if (std::holds_alternative<ParseSuccess<T>>(a_result))
         {
             const auto &fst = std::get<ParseSuccess<T>>(a_result);
-            const auto b_result = b(fst.rest);
+            const ParseResult<U> b_result = b(fst.rest);
             if (std::holds_alternative<ParseSuccess<U>>(b_result))
             {
                 const ParseSuccess<U> &sec = std::get<ParseSuccess<U>>(b_result);
-                const auto value = std::make_tuple(fst.value, sec.value);
+                const Tuple<T, U> value = std::make_tuple(fst.value, sec.value);
                 return ParseResult<Tuple<T, U>>(ParseSuccess{value, sec.rest});
             }
             else
             {
-                return ParseResult<Tuple<T, U>>(ParseFailure{"Unable to parse tuple"});
+                return ParseResult<Tuple<T, U>>(ParseFailure{"Unable to parse tuple (1)"});
             }
         }
         else
         {
-            return ParseResult<Tuple<T, U>>(ParseFailure{"Unable to parse typle"});
+            return ParseResult<Tuple<T, U>>(ParseFailure{"Unable to parse tuple (0)"});
         }
     };
 }
@@ -74,7 +74,7 @@ Parser<Tuple<T, U>> AndThen(const Parser<T> &a, const Parser<U> &b)
 template <typename T>
 Parser<T> OrElse(const Parser<T> &a, const Parser<T> &b)
 {
-    return [&a, &b](const std::string &input) {
+    return [a, b](const std::string &input) {
         auto result = a(input);
         if (std::holds_alternative<ParseSuccess<T>>(result))
         {
@@ -106,7 +106,7 @@ Parser<T> AnyOf(const std::vector<Parser<T>> &choices)
 template <typename T, typename U>
 Parser<U> Map(const Parser<T> &parser, const std::function<U(T)> &f)
 {
-    return [&parser, &f](const std::string &input) {
+    return [parser, f](const std::string &input) {
         const auto result = parser(input);
         if (std::holds_alternative<ParseSuccess<T>>(result))
         {
