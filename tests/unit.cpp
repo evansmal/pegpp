@@ -3,7 +3,7 @@
 #include "../src/ccombinators.h"
 
 template <typename T>
-std::string UnwrapRest(const ParseResult<T> &result)
+std::string_view UnwrapRest(const ParseResult<T> &result)
 {
     if (std::holds_alternative<ParseSuccess<T>>(result))
     {
@@ -113,22 +113,6 @@ TEST_CASE("AnyOf", "[AnyOf]")
     }
 }
 
-TEST_CASE("Parse single digits", "[Digit]")
-{
-    SECTION("Handle single values")
-    {
-        REQUIRE(UnwrapValue(Digit()("0")) == '0');
-        REQUIRE(UnwrapValue(Digit()("123")) == '1');
-        REQUIRE(UnwrapValue(Digit()("321")) == '3');
-    }
-    SECTION("Fail to parse")
-    {
-        REQUIRE(UnwrapResult(Digit()("A")) == false);
-        REQUIRE(UnwrapResult(Digit()("B")) == false);
-        REQUIRE(UnwrapResult(Digit()("{}{}{}")) == false);
-    }
-}
-
 TEST_CASE("Map parsers", "[Map]")
 {
     SECTION("Handle single values")
@@ -139,5 +123,21 @@ TEST_CASE("Map parsers", "[Map]")
         };
         const auto parser = Map(AndThen(Literal('1'), Literal('2')), f);
         REQUIRE(UnwrapValue(parser("12")) == 12);
+    }
+}
+
+TEST_CASE("Parse single digits", "[Digit]")
+{
+    SECTION("Handle single values")
+    {
+        REQUIRE(UnwrapValue(Digit()("0")) == 0);
+        REQUIRE(UnwrapValue(Digit()("123")) == 1);
+        REQUIRE(UnwrapValue(Digit()("321")) == 3);
+    }
+    SECTION("Fail to parse")
+    {
+        REQUIRE(UnwrapResult(Digit()("A")) == false);
+        REQUIRE(UnwrapResult(Digit()("B")) == false);
+        REQUIRE(UnwrapResult(Digit()("{}{}{}")) == false);
     }
 }

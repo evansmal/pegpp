@@ -10,26 +10,26 @@ template <typename T>
 struct ParseSuccess
 {
     T value;
-    std::string rest;
+    std::string_view rest;
 };
 
 struct ParseFailure
 {
-    std::string message;
+    std::string_view message;
 };
 
 template <typename T>
 using ParseResult = std::variant<ParseSuccess<T>, ParseFailure>;
 
 template <typename T>
-using Parser = std::function<ParseResult<T>(const std::string &)>;
+using Parser = std::function<ParseResult<T>(const std::string_view &)>;
 
 template <typename T, typename U>
 using Tuple = std::tuple<T, U>;
 
 Parser<char> Literal(char c)
 {
-    return [c](const std::string &input) {
+    return [c](const std::string_view &input) {
         if (input[0] == c)
         {
             return ParseResult<char>(
@@ -47,7 +47,7 @@ Parser<char> Literal(char c)
 template <typename T, typename U>
 Parser<Tuple<T, U>> AndThen(const Parser<T> &a, const Parser<U> &b)
 {
-    return [a, b](const std::string &input) {
+    return [a, b](const std::string_view &input) {
         const auto a_result = a(input);
         if (std::holds_alternative<ParseSuccess<T>>(a_result))
         {
@@ -74,7 +74,7 @@ Parser<Tuple<T, U>> AndThen(const Parser<T> &a, const Parser<U> &b)
 template <typename T>
 Parser<T> OrElse(const Parser<T> &a, const Parser<T> &b)
 {
-    return [a, b](const std::string &input) {
+    return [a, b](const std::string_view &input) {
         auto result = a(input);
         if (std::holds_alternative<ParseSuccess<T>>(result))
         {
@@ -90,10 +90,10 @@ Parser<T> OrElse(const Parser<T> &a, const Parser<T> &b)
 template <typename T>
 Parser<T> AnyOf(std::vector<Parser<T>> choices)
 {
-    return [choices](const std::string &input) {
+    return [choices](const std::string_view &input) {
         for (const auto &parser : choices)
         {
-            auto result = parser(input);
+            const ParseResult<T> result = parser(input);
             if (std::holds_alternative<ParseSuccess<T>>(result))
             {
                 return result;
@@ -106,8 +106,8 @@ Parser<T> AnyOf(std::vector<Parser<T>> choices)
 template <typename T, typename U>
 Parser<U> Map(const Parser<T> &parser, const std::function<U(T)> &f)
 {
-    return [parser, f](const std::string &input) {
-        const auto result = parser(input);
+    return [parser, f](const std::string_view &input) {
+        const ParseResult<T> result = parser(input);
         if (std::holds_alternative<ParseSuccess<T>>(result))
         {
             const auto &succ = std::get<ParseSuccess<T>>(result);
@@ -120,8 +120,10 @@ Parser<U> Map(const Parser<T> &parser, const std::function<U(T)> &f)
     };
 }
 
-Parser<char> Digit()
+Parser<int> Digit()
 {
-    return AnyOf<char>({Literal('1'), Literal('2'), Literal('3'), Literal('4'), Literal('5'),
-                        Literal('6'), Literal('7'), Literal('8'), Literal('9'), Literal('0')});
+    const std::function<int(char)> char_to_int = [](char c) { return c - '0'; };
+    return Map(AnyOf<char>({Literal('1'), Literal('2'), Literal('3'), Literal('4'), Literal('5'),
+                            Literal('6'), Literal('7'), Literal('8'), Literal('9'), Literal('0')}),
+               char_to_int);
 }
