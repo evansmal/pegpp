@@ -117,7 +117,8 @@ TEST_CASE("Map parsers", "[Map]")
 {
     SECTION("Handle single values")
     {
-        const std::function<int(Tuple<char, char>)> f = [](Tuple<char, char> v) {
+        const std::function<int(Tuple<char, char>)> f = [](Tuple<char, char> v)
+        {
             const auto str = std::string({std::get<0>(v), std::get<1>(v)});
             return std::stoi(str.c_str());
         };
