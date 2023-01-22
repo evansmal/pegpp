@@ -145,3 +145,27 @@ TEST_CASE("Many parser", "[Many]")
         REQUIRE(UnwrapValue(parser("A")).size() == 0);
     }
 }
+
+TEST_CASE("ManyOne parser", "[ManyOne]")
+{
+    SECTION("Handle expected values")
+    {
+        const auto parser = ManyOne(Digit());
+
+        REQUIRE(UnwrapValue(parser("0"))[0] == 0);
+
+        REQUIRE(UnwrapValue(parser("123"))[0] == 1);
+        REQUIRE(UnwrapValue(parser("123"))[1] == 2);
+        REQUIRE(UnwrapValue(parser("123"))[2] == 3);
+
+        REQUIRE(UnwrapValue(parser("666")).size() == 3);
+        REQUIRE(UnwrapValue(parser("12345A")).size() == 5);
+    }
+    SECTION("Fail to parse")
+    {
+        const auto parser = ManyOne(Digit());
+        REQUIRE(UnwrapResult(parser("")) == false);
+        REQUIRE(UnwrapResult(parser("A")) == false);
+        REQUIRE(UnwrapResult(parser("A123")) == false);
+    }
+}

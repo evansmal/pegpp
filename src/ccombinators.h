@@ -149,6 +149,21 @@ Parser<std::vector<T>> Many(const Parser<T> &parser)
     };
 }
 
+template <typename T>
+Parser<std::vector<T>> ManyOne(const Parser<T> &parser)
+{
+    return [parser](const std::string_view &input)
+    {
+        const ParseResult<std::vector<T>> many_result = Many(parser)(input);
+        const ParseSuccess<std::vector<T>> &succ =
+            std::get<ParseSuccess<std::vector<T>>>(many_result);
+        if (succ.value.size() == 0)
+            return ParseResult<std::vector<T>>{ParseFailure{}};
+        else
+            return many_result;
+    };
+}
+
 Parser<int> Digit()
 {
     const std::function<int(char)> char_to_int = [](char c) { return c - '0'; };
