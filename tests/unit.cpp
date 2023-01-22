@@ -169,3 +169,13 @@ TEST_CASE("ManyOne parser", "[ManyOne]")
         REQUIRE(UnwrapResult(parser("A123")) == false);
     }
 }
+
+TEST_CASE("Integer parser", "[Integer]")
+{
+    SECTION("Handle expected values")
+    {
+        REQUIRE(UnwrapValue(Integer()("0")) == 0);
+        REQUIRE(UnwrapValue(Integer()("123")) == 123);
+        REQUIRE(UnwrapValue(Integer()("012")) == 12);
+    }
+}

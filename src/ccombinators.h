@@ -179,3 +179,17 @@ Parser<int> Digit()
                             Literal('0')}),
                char_to_int);
 }
+
+Parser<int> Integer()
+{
+    const std::function<int(std::vector<int>)> to_int = [](const std::vector<int> &digits)
+    {
+        int result = 0;
+        for (const auto &i : digits)
+        {
+            result = (result * 10) + i;
+        }
+        return result;
+    };
+    return Map(ManyOne(Digit()), to_int);
+}
