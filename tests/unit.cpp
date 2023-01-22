@@ -127,18 +127,21 @@ TEST_CASE("Map parsers", "[Map]")
     }
 }
 
-TEST_CASE("Parse single digits", "[Digit]")
+TEST_CASE("Many parser", "[Many]")
 {
-    SECTION("Handle single values")
+    SECTION("Handle expected values")
     {
-        REQUIRE(UnwrapValue(Digit()("0")) == 0);
-        REQUIRE(UnwrapValue(Digit()("123")) == 1);
-        REQUIRE(UnwrapValue(Digit()("321")) == 3);
-    }
-    SECTION("Fail to parse")
-    {
-        REQUIRE(UnwrapResult(Digit()("A")) == false);
-        REQUIRE(UnwrapResult(Digit()("B")) == false);
-        REQUIRE(UnwrapResult(Digit()("{}{}{}")) == false);
+        const auto parser = Many(Digit());
+
+        REQUIRE(UnwrapValue(parser("0"))[0] == 0);
+
+        REQUIRE(UnwrapValue(parser("123"))[0] == 1);
+        REQUIRE(UnwrapValue(parser("123"))[1] == 2);
+        REQUIRE(UnwrapValue(parser("123"))[2] == 3);
+
+        REQUIRE(UnwrapValue(parser("666")).size() == 3);
+        REQUIRE(UnwrapValue(parser("12345A")).size() == 5);
+        REQUIRE(UnwrapValue(parser("")).size() == 0);
+        REQUIRE(UnwrapValue(parser("A")).size() == 0);
     }
 }

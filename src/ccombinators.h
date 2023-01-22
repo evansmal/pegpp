@@ -125,6 +125,30 @@ Parser<U> Map(const Parser<T> &parser, const std::function<U(T)> &f)
     };
 }
 
+template <typename T>
+Parser<std::vector<T>> Many(const Parser<T> &parser)
+{
+    return [parser](const std::string_view &input)
+    {
+        std::string_view rest = input;
+        std::vector<T> results;
+        while (true)
+        {
+            const ParseResult<T> single_result = parser(rest);
+            if (std::holds_alternative<ParseSuccess<T>>(single_result))
+            {
+                const ParseSuccess<T> &succ = std::get<ParseSuccess<T>>(single_result);
+                results.push_back(succ.value);
+                rest = succ.rest;
+            }
+            else
+            {
+                return ParseResult<std::vector<T>>{ParseSuccess<std::vector<T>>{results, rest}};
+            }
+        }
+    };
+}
+
 Parser<int> Digit()
 {
     const std::function<int(char)> char_to_int = [](char c) { return c - '0'; };
