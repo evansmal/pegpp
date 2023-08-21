@@ -39,3 +39,32 @@ auto Range(const std::string &start, const std::string &end) -> Parser
         return Result{Failure{"Range"}};
     };
 }
+
+auto Sequence(const std::vector<Parser> &parsers) -> Parser
+{
+    if (parsers.empty())
+    {
+        throw std::runtime_error("Expected sequence to contain at least one parser");
+    }
+    return [parsers](const std::string &input)
+    {
+        std::vector<Node> nodes;
+        std::string source = input;
+        for (const auto &parser : parsers)
+        {
+            const Result result = parser(source);
+            if (std::holds_alternative<Failure>(result))
+            {
+                return Result{Failure{"Sequence"}};
+            }
+
+            const auto &success = std::get<Success>(result);
+            for (const auto &node : success.node)
+            {
+                nodes.push_back(node);
+            }
+            source = success.remainder;
+        }
+        return Result{Success{nodes, source}};
+    };
+}

@@ -102,8 +102,21 @@ TEST_CASE("Ranges are parsed", "[Range]")
             REQUIRE(UnwrapTerminal(res.node[0]).value == "5");
         }
     }
-    SECTION("Expect failure")
+    SECTION("Expect failure") { UnwrapFailure(Range("0", "1")("2")); }
+}
+
+TEST_CASE("Sequence parsers", "[Sequence]")
+{
+    SECTION("")
     {
-        UnwrapFailure(Range("0", "1")("2"));
+        {
+            auto res = UnwrapSuccess(Sequence({Literal("A"), Literal("B"), Literal("C")})("ABC"));
+            REQUIRE(!res.node.empty());
+            REQUIRE(res.node.size() == 3);
+            REQUIRE(res.remainder.empty());
+            REQUIRE(UnwrapTerminal(res.node[0]).value == "A");
+            REQUIRE(UnwrapTerminal(res.node[1]).value == "B");
+            REQUIRE(UnwrapTerminal(res.node[2]).value == "C");
+        }
     }
 }
