@@ -107,7 +107,7 @@ TEST_CASE("Ranges are parsed", "[Range]")
 
 TEST_CASE("Sequence parsers", "[Sequence]")
 {
-    SECTION("")
+    SECTION("Parse sequence of literals")
     {
         {
             auto res = UnwrapSuccess(Sequence({Literal("A"), Literal("B"), Literal("C")})("ABC"));
@@ -118,5 +118,9 @@ TEST_CASE("Sequence parsers", "[Sequence]")
             REQUIRE(UnwrapTerminal(res.node[1]).value == "B");
             REQUIRE(UnwrapTerminal(res.node[2]).value == "C");
         }
+    }
+    SECTION("Expect failure")
+    {
+        UnwrapFailure(Sequence({Literal("0"), Literal("1"), Literal("2")})("092"));
     }
 }
