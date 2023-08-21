@@ -17,7 +17,8 @@ auto UnwrapFailure(const Result &result) -> Failure
     {
         return std::get<Failure>(result);
     }
-    throw std::runtime_error("Failed to unwrap parser failure");
+    const auto success = std::get<Success>(result);
+    throw std::runtime_error("Failed to unwrap parser failure. Remainder: " + success.remainder);
 }
 
 auto UnwrapTerminal(const Node &node) -> Terminal
@@ -63,7 +64,7 @@ TEST_CASE("Literals are parsed", "[Literal]")
             REQUIRE(UnwrapTerminal(res.node[0]).value == "123");
         }
     }
-    SECTION("Fail to parse")
+    SECTION("Expect failure")
     {
         UnwrapFailure(Literal("X")("Y"));
         UnwrapFailure(Literal("XY")("YX"));
@@ -100,5 +101,9 @@ TEST_CASE("Ranges are parsed", "[Range]")
             REQUIRE(res.remainder == "678");
             REQUIRE(UnwrapTerminal(res.node[0]).value == "5");
         }
+    }
+    SECTION("Expect failure")
+    {
+        UnwrapFailure(Range("0", "1")("2"));
     }
 }

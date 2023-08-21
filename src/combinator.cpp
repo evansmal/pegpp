@@ -1,13 +1,14 @@
 
 #include "combinator.hpp"
 
+#include <iostream>
 #include <stdexcept>
 
 auto Literal(const std::string &value) -> Parser
 {
     return [value](const std::string &input)
     {
-        for (int i = 0; i < value.size(); i++)
+        for (unsigned int i = 0; i < value.size(); i++)
         {
             if (value[i] != input[i])
             {
@@ -29,7 +30,7 @@ auto Range(const std::string &start, const std::string &end) -> Parser
     return [start, end](const std::string &input)
     {
         char c = input[0];
-        if (c >= start[0] || c <= end[0])
+        if (c >= start[0] && c <= end[0])
         {
             Terminal terminal{{input.begin(), input.begin() + 1}};
             std::string remainder{input.begin() + 1, input.end()};
