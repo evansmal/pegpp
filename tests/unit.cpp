@@ -66,9 +66,9 @@ TEST_CASE("Literals are parsed", "[Literal]")
     }
     SECTION("Expect failure")
     {
-        UnwrapFailure(Literal("X")("Y"));
-        UnwrapFailure(Literal("XY")("YX"));
-        UnwrapFailure(Literal("A")(""));
+        REQUIRE_NOTHROW(UnwrapFailure(Literal("X")("Y")));
+        REQUIRE_NOTHROW(UnwrapFailure(Literal("XY")("YX")));
+        REQUIRE_NOTHROW(UnwrapFailure(Literal("A")("")));
     }
 }
 
@@ -102,7 +102,7 @@ TEST_CASE("Ranges are parsed", "[Range]")
             REQUIRE(UnwrapTerminal(res.node[0]).value == "5");
         }
     }
-    SECTION("Expect failure") { UnwrapFailure(Range("0", "1")("2")); }
+    SECTION("Expect failure") { REQUIRE_NOTHROW(UnwrapFailure(Range("0", "1")("2"))); }
 }
 
 TEST_CASE("Sequence parsers", "[Sequence]")
@@ -121,6 +121,81 @@ TEST_CASE("Sequence parsers", "[Sequence]")
     }
     SECTION("Expect failure")
     {
-        UnwrapFailure(Sequence({Literal("0"), Literal("1"), Literal("2")})("092"));
+        REQUIRE_NOTHROW(UnwrapFailure(Sequence({Literal("0"), Literal("1"), Literal("2")})("092")));
+    }
+}
+
+TEST_CASE("Alternative parsers", "[Alternative]")
+{
+    SECTION("Parse alternative set of literals")
+    {
+        {
+            auto res = UnwrapSuccess(Alternative({Literal("A"), Literal("B"), Literal("C")})("C"));
+            REQUIRE(!res.node.empty());
+            REQUIRE(res.node.size() == 1);
+            REQUIRE(res.remainder.empty());
+            REQUIRE(UnwrapTerminal(res.node[0]).value == "C");
+        }
+        {
+            auto res = UnwrapSuccess(Alternative({Literal("2"), Literal("1")})("123"));
+            REQUIRE(!res.node.empty());
+            REQUIRE(res.node.size() == 1);
+            REQUIRE(res.remainder.size() == 2);
+            REQUIRE(UnwrapTerminal(res.node[0]).value == "1");
+        }
+    }
+    SECTION("Expect failure")
+    {
+        REQUIRE_NOTHROW(UnwrapFailure(Alternative({Literal("0")})("1")));
+        REQUIRE_NOTHROW(
+            UnwrapFailure(Alternative({Literal("0"), Literal("1"), Literal("2")})("3")));
+    }
+}
+
+TEST_CASE("Optional parsers", "[Optional]")
+{
+    SECTION("Parse optionals")
+    {
+        {
+            auto res = UnwrapSuccess(Optional(Literal("1"))("1"));
+            REQUIRE(!res.node.empty());
+            REQUIRE(res.node.size() == 1);
+            REQUIRE(res.remainder.empty());
+            REQUIRE(UnwrapTerminal(res.node[0]).value == "1");
+        }
+        {
+            auto res = UnwrapSuccess(Optional(Literal("A"))("C"));
+            REQUIRE(res.node.empty());
+            REQUIRE(res.node.empty());
+            REQUIRE(res.remainder.size() == 1);
+        }
+    }
+}
+
+TEST_CASE("One or more parsers", "[OneOrMore]")
+{
+    SECTION("Parse one or more literals")
+    {
+        {
+            auto res = UnwrapSuccess(OneOrMore(Literal("1"))("1"));
+            REQUIRE(!res.node.empty());
+            REQUIRE(res.node.size() == 1);
+            REQUIRE(res.remainder.empty());
+            REQUIRE(UnwrapTerminal(res.node[0]).value == "1");
+        }
+        {
+            auto res = UnwrapSuccess(OneOrMore(Literal("1"))("111"));
+            REQUIRE(!res.node.empty());
+            REQUIRE(res.node.size() == 3);
+            REQUIRE(res.remainder.empty());
+            REQUIRE(UnwrapTerminal(res.node[0]).value == "1");
+            REQUIRE(UnwrapTerminal(res.node[1]).value == "1");
+            REQUIRE(UnwrapTerminal(res.node[2]).value == "1");
+        }
+    }
+    SECTION("Fail to parse a single literal")
+    {
+        REQUIRE_NOTHROW(UnwrapFailure(OneOrMore(Literal("1"))("0")));
+        REQUIRE_NOTHROW(UnwrapFailure(OneOrMore(Literal("1"))("321")));
     }
 }

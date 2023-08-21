@@ -68,3 +68,72 @@ auto Sequence(const std::vector<Parser> &parsers) -> Parser
         return Result{Success{nodes, source}};
     };
 }
+
+auto Alternative(const std::vector<Parser> &parsers) -> Parser
+{
+    if (parsers.empty())
+    {
+        throw std::runtime_error("Expected alternative to contain at least one parser");
+    }
+    return [parsers](const std::string &input)
+    {
+        for (const auto &parser : parsers)
+        {
+            const Result result = parser(input);
+            if (std::holds_alternative<Success>(result))
+            {
+                const auto &success = std::get<Success>(result);
+                return Result{success};
+            }
+        }
+        return Result{Failure{"Alternative"}};
+    };
+}
+
+auto Optional(const Parser &parser) -> Parser
+{
+    return [parser](const std::string &input)
+    {
+        const Result result = parser(input);
+        if (std::holds_alternative<Success>(result))
+        {
+            const auto &success = std::get<Success>(result);
+            return Result{success};
+        }
+        Success success{{}, input};
+        return Result{success};
+    };
+}
+
+auto OneOrMore(const Parser &parser) -> Parser
+{
+    return [parser](const std::string &input)
+    {
+        const Result result = parser(input);
+        if (std::holds_alternative<Failure>(result))
+        {
+            return Result{Failure{"Sequence"}};
+        }
+
+        const auto &success = std::get<Success>(result);
+
+        std::vector<Node> nodes{success.node};
+        std::string source = success.remainder;
+
+        while (true)
+        {
+            const Result result = parser(source);
+            if (std::holds_alternative<Failure>(result))
+            {
+                return Result{Success{nodes, source}};
+            }
+
+            const auto &success = std::get<Success>(result);
+            for (const auto &node : success.node)
+            {
+                nodes.push_back(node);
+            }
+            source = success.remainder;
+        }
+    };
+}
