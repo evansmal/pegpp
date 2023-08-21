@@ -1,10 +1,11 @@
-project(ccombinators)
 cmake_minimum_required(VERSION 3.22)
+project(ccombinators)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(json src/json.cpp)
-target_compile_options(json PUBLIC -O3 -Wall -std=c++20 )
+add_library(peg src/combinator.cpp)
+target_include_directories(peg PUBLIC src)
+target_compile_options(peg PUBLIC -O2 -Wall -std=c++20)
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     include(CTest)

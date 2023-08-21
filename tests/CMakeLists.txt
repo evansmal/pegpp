@@ -1,5 +1,3 @@
-cmake_policy(SET CMP0048 NEW)
-
 Include(FetchContent)
 
 FetchContent_Declare(
@@ -9,7 +7,10 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(Catch2)
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+include(CTest) 
+include(Catch)
 
 add_executable(unit unit.cpp)
-target_link_libraries(unit PRIVATE Catch2::Catch2WithMain)
+target_link_libraries(unit PRIVATE Catch2::Catch2WithMain PRIVATE peg)
 target_compile_options(unit PUBLIC -O0 -Wall -std=c++20)
