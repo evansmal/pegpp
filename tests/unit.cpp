@@ -30,6 +30,15 @@ auto UnwrapTerminal(const Node &node) -> Terminal
     throw std::runtime_error("Failed to unwrap Terminal");
 }
 
+auto UnwrapNonTerminal(const Node &node) -> NonTerminal
+{
+    if (std::holds_alternative<NonTerminal>(node))
+    {
+        return std::get<NonTerminal>(node);
+    }
+    throw std::runtime_error("Failed to unwrap NonTerminal");
+}
+
 TEST_CASE("Literals are parsed", "[Literal]")
 {
     SECTION("Handle single values")
@@ -263,6 +272,20 @@ TEST_CASE("Not parser", "[Not]")
             auto res = UnwrapSuccess(Not(Literal("1"))("ABC"));
             REQUIRE(res.node.empty());
             REQUIRE(res.remainder.size() == 3);
+        }
+    }
+}
+
+TEST_CASE("Definition parser", "[Definition]")
+{
+    SECTION("Parse definitions")
+    {
+        {
+            auto res = UnwrapSuccess(Definition(Literal("0"), "ZERO")("0"));
+            REQUIRE(res.node.size() == 1);
+            REQUIRE(res.remainder.empty());
+            REQUIRE(UnwrapNonTerminal(res.node[0]).children.size() == 1);
+            REQUIRE(UnwrapNonTerminal(res.node[0]).type == "ZERO");
         }
     }
 }

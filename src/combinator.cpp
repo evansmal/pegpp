@@ -188,3 +188,18 @@ auto Not(const Parser &parser) -> Parser
         return Result{Success{{}, input}};
     };
 }
+
+auto Definition(const Parser &parser, const std::string &type) -> Parser
+{
+    return [parser, type](const std::string &input)
+    {
+        Result result = parser(input);
+        if (std::holds_alternative<Success>(result))
+        {
+            const auto &success = std::get<Success>(result);
+            NonTerminal node{type, success.node};
+            return Result{Success{{node}, success.remainder}};
+        }
+        return result;
+    };
+}
