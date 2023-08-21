@@ -12,6 +12,6 @@ include(CTest)
 include(Catch)
 
 add_executable(unit unit.cpp)
-target_link_libraries(unit PRIVATE Catch2::Catch2WithMain PRIVATE peg)
+target_link_libraries(unit PRIVATE Catch2::Catch2WithMain PRIVATE pegpp)
 target_compile_options(unit PUBLIC -O0 -Wall -std=c++20)
 catch_discover_tests(unit)
