@@ -199,3 +199,70 @@ TEST_CASE("One or more parsers", "[OneOrMore]")
         REQUIRE_NOTHROW(UnwrapFailure(OneOrMore(Literal("1"))("321")));
     }
 }
+
+TEST_CASE("Zero or more parsers", "[ZeroOrMore]")
+{
+    SECTION("Parse zero or more literals")
+    {
+        {
+            auto res = UnwrapSuccess(ZeroOrMore(Literal("1"))("1"));
+            REQUIRE(!res.node.empty());
+            REQUIRE(res.node.size() == 1);
+            REQUIRE(res.remainder.empty());
+            REQUIRE(UnwrapTerminal(res.node[0]).value == "1");
+        }
+        {
+            auto res = UnwrapSuccess(ZeroOrMore(Literal("1"))("111"));
+            REQUIRE(!res.node.empty());
+            REQUIRE(res.node.size() == 3);
+            REQUIRE(res.remainder.empty());
+            REQUIRE(UnwrapTerminal(res.node[0]).value == "1");
+            REQUIRE(UnwrapTerminal(res.node[1]).value == "1");
+            REQUIRE(UnwrapTerminal(res.node[2]).value == "1");
+        }
+        {
+            auto res = UnwrapSuccess(ZeroOrMore(Literal("1"))("0"));
+            REQUIRE(res.node.empty());
+            REQUIRE(res.remainder.size() == 1);
+        }
+        {
+            auto res = UnwrapSuccess(ZeroOrMore(Literal("A"))("98765"));
+            REQUIRE(res.node.empty());
+            REQUIRE(res.remainder.size() == 5);
+        }
+        {
+            auto res = UnwrapSuccess(ZeroOrMore(Literal("Z"))("ABC"));
+            REQUIRE(res.node.empty());
+            REQUIRE(res.remainder.size() == 3);
+        }
+    }
+}
+
+TEST_CASE("And parser", "[And]")
+{
+    SECTION("Parse AND literals")
+    {
+        {
+            auto res = UnwrapSuccess(And(Literal("1"))("1"));
+            REQUIRE(res.node.empty());
+            REQUIRE(res.remainder.size() == 1);
+        }
+    }
+}
+
+TEST_CASE("Not parser", "[Not]")
+{
+    SECTION("Parse NOT literals")
+    {
+        {
+            auto res = UnwrapSuccess(Not(Literal("1"))("0"));
+            REQUIRE(res.node.empty());
+            REQUIRE(res.remainder.size() == 1);
+        }
+        {
+            auto res = UnwrapSuccess(Not(Literal("1"))("ABC"));
+            REQUIRE(res.node.empty());
+            REQUIRE(res.remainder.size() == 3);
+        }
+    }
+}

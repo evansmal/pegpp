@@ -137,3 +137,54 @@ auto OneOrMore(const Parser &parser) -> Parser
         }
     };
 }
+
+auto ZeroOrMore(const Parser &parser) -> Parser
+{
+    return [parser](const std::string &input)
+    {
+        std::vector<Node> nodes;
+        std::string source = input;
+
+        while (true)
+        {
+            const Result result = parser(source);
+            if (std::holds_alternative<Failure>(result))
+            {
+                return Result{Success{nodes, source}};
+            }
+
+            const auto &success = std::get<Success>(result);
+            for (const auto &node : success.node)
+            {
+                nodes.push_back(node);
+            }
+            source = success.remainder;
+        }
+    };
+}
+
+auto And(const Parser &parser) -> Parser
+{
+    return [parser](const std::string &input)
+    {
+        Result result = parser(input);
+        if (std::holds_alternative<Success>(result))
+        {
+            return Result{Success{{}, input}};
+        }
+        return result;
+    };
+}
+
+auto Not(const Parser &parser) -> Parser
+{
+    return [parser](const std::string &input)
+    {
+        Result result = parser(input);
+        if (std::holds_alternative<Success>(result))
+        {
+            return Result{Failure{"Not"}};
+        }
+        return Result{Success{{}, input}};
+    };
+}
