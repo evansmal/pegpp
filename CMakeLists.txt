@@ -3,9 +3,13 @@ project(pegpp)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_library(pegpp src/combinator.cpp)
+add_library(pegpp src/ast.cpp src/combinator.cpp src/parser.cpp)
 target_include_directories(pegpp PUBLIC src)
 target_compile_options(pegpp PUBLIC -O2 -Wall -std=c++20)
+
+add_executable(parser src/main.cpp)
+target_link_libraries(parser PUBLIC pegpp)
+target_compile_options(parser PUBLIC -O2 -Wall -std=c++20)
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     include(CTest)

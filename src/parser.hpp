@@ -1,6 +1,8 @@
 #pragma once
 
 #include <functional>
+#include <iostream>
+#include <stdexcept>
 #include <string>
 #include <variant>
 #include <vector>
@@ -35,3 +37,5 @@ struct Failure
 using Result = std::variant<Success, Failure>;
 
 using Parser = std::function<Result(const std::string &)>;
+
+void Dump(const Node &node);

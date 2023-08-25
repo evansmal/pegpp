@@ -16,7 +16,8 @@ auto Literal(const std::string &value) -> Parser
             }
         }
         Terminal terminal{std::string(value)};
-        std::string remainder{input.begin() + static_cast<int>(value.size()), input.end()};
+        std::string remainder{input.begin() + static_cast<int>(value.size()),
+                              input.end()};
         return Result{Success{{terminal}, remainder}};
     };
 }
