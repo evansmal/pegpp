@@ -18,7 +18,8 @@ auto UnwrapFailure(const Result &result) -> Failure
         return std::get<Failure>(result);
     }
     const auto success = std::get<Success>(result);
-    throw std::runtime_error("Failed to unwrap parser failure. Remainder: " + success.remainder);
+    throw std::runtime_error("Failed to unwrap parser failure. Remainder: " +
+                             success.remainder);
 }
 
 auto UnwrapTerminal(const Node &node) -> Terminal
@@ -119,7 +120,8 @@ TEST_CASE("Sequence parsers", "[Sequence]")
     SECTION("Parse sequence of literals")
     {
         {
-            auto res = UnwrapSuccess(Sequence({Literal("A"), Literal("B"), Literal("C")})("ABC"));
+            auto res = UnwrapSuccess(
+                Sequence({Literal("A"), Literal("B"), Literal("C")})("ABC"));
             REQUIRE(!res.node.empty());
             REQUIRE(res.node.size() == 3);
             REQUIRE(res.remainder.empty());
@@ -130,7 +132,8 @@ TEST_CASE("Sequence parsers", "[Sequence]")
     }
     SECTION("Expect failure")
     {
-        REQUIRE_NOTHROW(UnwrapFailure(Sequence({Literal("0"), Literal("1"), Literal("2")})("092")));
+        REQUIRE_NOTHROW(
+            UnwrapFailure(Sequence({Literal("0"), Literal("1"), Literal("2")})("092")));
     }
 }
 
@@ -139,7 +142,8 @@ TEST_CASE("Alternative parsers", "[Alternative]")
     SECTION("Parse alternative set of literals")
     {
         {
-            auto res = UnwrapSuccess(Alternative({Literal("A"), Literal("B"), Literal("C")})("C"));
+            auto res = UnwrapSuccess(
+                Alternative({Literal("A"), Literal("B"), Literal("C")})("C"));
             REQUIRE(!res.node.empty());
             REQUIRE(res.node.size() == 1);
             REQUIRE(res.remainder.empty());
@@ -286,6 +290,31 @@ TEST_CASE("Definition parser", "[Definition]")
             REQUIRE(res.remainder.empty());
             REQUIRE(UnwrapNonTerminal(res.node[0]).children.size() == 1);
             REQUIRE(UnwrapNonTerminal(res.node[0]).type == "ZERO");
+        }
+        {
+            auto parser =
+                Definition(Sequence({OneOrMore(Literal("0")), OneOrMore(Literal("1"))}),
+                           "ZerosAndOnes");
+
+            {
+                auto res = UnwrapSuccess(parser("0000011111"));
+
+                REQUIRE(res.remainder.empty());
+
+                REQUIRE(res.node.size() == 1);
+                const auto &root = UnwrapNonTerminal(res.node[0]);
+
+                REQUIRE(root.children.size() == 10);
+                REQUIRE(root.type == "ZerosAndOnes");
+                for (const auto &child : root.children)
+                {
+                    REQUIRE_NOTHROW(UnwrapTerminal(child));
+                }
+            }
+
+            REQUIRE_NOTHROW(UnwrapFailure(parser("111000")));
+            REQUIRE_NOTHROW(UnwrapFailure(parser("0")));
+            REQUIRE_NOTHROW(UnwrapFailure(parser("")));
         }
     }
 }
