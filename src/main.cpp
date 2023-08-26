@@ -66,8 +66,6 @@ int main()
         ast::Definition(ast::Identifier("Plus"), ast::Literal("+")),
         ast::Definition(ast::Identifier("Minus"), ast::Literal("-")));
 
-    g.Dump();
-
     const auto parser = GenerateParserMap(g);
 
     const auto result = parser.at("Test")("+-");
@@ -82,7 +80,7 @@ int main()
     }
     else
     {
-        std::cout << "Parse failed!" << std::endl;
+
     }
 
     return 0;

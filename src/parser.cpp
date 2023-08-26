@@ -1,32 +1,33 @@
 #include "parser.hpp"
 
-void DumpTerminal(const Terminal &node)
+static void Indent(int level)
 {
-    std::cout << "[ " << node.value << " ]" << std::endl;
+    for (int i = 0; i < level; ++i)
+    {
+        std::cout << "  ";
+    }
 }
 
-void DumpNonTerminal(const NonTerminal &node)
+void Dump(const Node &node, int level)
 {
-    std::cout << " >>> " << node.type << std::endl;
-    for (const auto &child : node.children)
-    {
-        Dump(child);
-    }
-    std::cout << " >>> " << node.type << std::endl;
-}
-
-void Dump(const Node &node)
-{
-    if (std::holds_alternative<Terminal>(node))
-    {
-        DumpTerminal(std::get<Terminal>(node));
-    }
-    else if (std::holds_alternative<NonTerminal>(node))
-    {
-        DumpNonTerminal(std::get<NonTerminal>(node));
-    }
-    else
-    {
-        throw std::runtime_error("Invalid node type encountered");
-    }
+    std::visit(
+        [level](auto &&arg)
+        {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, Terminal>)
+            {
+                Indent(level);
+                std::cout << "-> Terminal: \"" << arg.value << '"' << std::endl;
+            }
+            else if constexpr (std::is_same_v<T, NonTerminal>)
+            {
+                Indent(level);
+                std::cout << "NonTerminal: " << arg.type << std::endl;
+                for (const auto &child : arg.children)
+                {
+                    Dump(child, level + 1);
+                }
+            }
+        },
+        node);
 }

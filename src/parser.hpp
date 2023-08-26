@@ -38,4 +38,4 @@ using Result = std::variant<Success, Failure>;
 
 using Parser = std::function<Result(const std::string &)>;
 
-void Dump(const Node &node);
+void Dump(const Node &node, int level = 0);

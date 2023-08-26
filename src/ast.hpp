@@ -52,8 +52,6 @@ struct Grammar
     {
     }
     std::vector<Definition> definitions;
-
-    void Dump();
 };
 
 } // namespace ast
