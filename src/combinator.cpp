@@ -1,7 +1,6 @@
 
 #include "combinator.hpp"
 
-#include <iostream>
 #include <stdexcept>
 
 auto Literal(const std::string &value) -> Parser

@@ -33,15 +33,7 @@ auto EmitExpression(const ast::Expression &expression, ParserMap &parser_map) ->
             {
                 Parser parser = [&](const std::string &input)
                 {
-                    std::cout << "Parsing " << expression.value << std::endl;
-                    std::cout << input << std::endl;
-                    for (const auto [f, s] : parser_map)
-                    {
-                        std::cout << f << std::endl;
-                    }
-                    std::cout << " TRYING IT" << std::endl;
                     auto res = parser_map.at(expression.value)(input);
-                    std::cout << " GOT IT" << std::endl;
                     return res;
                 };
                 return parser;
