@@ -1,7 +1,10 @@
 #pragma once
 
+#include "ast.hpp"
+
 #include <functional>
 #include <iostream>
+#include <map>
 #include <stdexcept>
 #include <string>
 #include <variant>
@@ -11,6 +14,8 @@ struct Terminal;
 struct NonTerminal;
 
 using Node = std::variant<Terminal, NonTerminal>;
+
+void Dump(const Node &node, int level = 0);
 
 struct Terminal
 {
@@ -37,5 +42,3 @@ struct Failure
 using Result = std::variant<Success, Failure>;
 
 using Parser = std::function<Result(const std::string &)>;
-
-void Dump(const Node &node, int level = 0);

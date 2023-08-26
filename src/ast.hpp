@@ -10,9 +10,10 @@ namespace ast
 
 struct Identifier;
 struct Literal;
+struct Range;
 struct Sequence;
 
-using Expression = std::variant<Sequence, Literal, Identifier>;
+using Expression = std::variant<Sequence, Range, Literal, Identifier>;
 
 struct Identifier
 {
@@ -24,6 +25,16 @@ struct Literal
 {
     Literal(std::string value) : value{std::move(value)} {}
     std::string value;
+};
+
+struct Range
+{
+    Range(std::string start, std::string end)
+        : start{std::move(start)}, end{std::move(end)}
+    {
+    }
+    std::string start;
+    std::string end;
 };
 
 struct Sequence
