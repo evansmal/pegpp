@@ -20,4 +20,6 @@ auto And(const Parser &parser) -> Parser;
 
 auto Not(const Parser &parser) -> Parser;
 
+auto Dot() -> Parser;
+
 auto Definition(const Parser &parser, const std::string &type) -> Parser;

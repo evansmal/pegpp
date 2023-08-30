@@ -189,6 +189,20 @@ auto Not(const Parser &parser) -> Parser
     };
 }
 
+auto Dot() -> Parser
+{
+    return [](const std::string &input)
+    {
+        if (input.empty())
+        {
+            return Result{Failure{{"Dot"}}};
+        }
+        std::string rest{input.begin() + 1, input.end()};
+        Terminal terminal{std::string(input.begin(), input.begin() + 1)};
+        return Result{Success{{terminal}, rest}};
+    };
+}
+
 auto Definition(const Parser &parser, const std::string &type) -> Parser
 {
     return [parser, type](const std::string &input)

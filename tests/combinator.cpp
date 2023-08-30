@@ -79,6 +79,19 @@ TEST_CASE("Ranges are parsed", "[Range]")
     SECTION("Expect failure") { REQUIRE_NOTHROW(UnwrapFailure(Range("0", "1")("2"))); }
 }
 
+TEST_CASE("Dot is parsed", "[Dot]")
+{
+    SECTION("Handle single values")
+    {
+        {
+            auto res = UnwrapSuccess(Dot()("a"));
+            REQUIRE(!res.node.empty());
+            REQUIRE(res.remainder.empty());
+            REQUIRE(UnwrapTerminal(res.node[0]).value == "a");
+        }
+    }
+}
+
 TEST_CASE("Sequence parsers", "[Sequence]")
 {
     SECTION("Parse sequence of literals")
@@ -249,13 +262,22 @@ TEST_CASE("Definition parser", "[Definition]")
     SECTION("Parse definitions")
     {
         {
-            auto res = UnwrapSuccess(Definition(Literal("0"), "ZERO")("0"));
+            auto res = UnwrapSuccess(Definition(Literal("0"), "Zero")("0"));
             REQUIRE(res.node.size() == 1);
             REQUIRE(res.remainder.empty());
             REQUIRE(UnwrapNonTerminal(res.node[0]).children.size() == 1);
-            REQUIRE(UnwrapNonTerminal(res.node[0]).type == "ZERO");
+            REQUIRE(UnwrapNonTerminal(res.node[0]).type == "Zero");
             REQUIRE(UnwrapTerminal(UnwrapNonTerminal(res.node[0]).children[0]).value ==
                     "0");
+        }
+        {
+            auto res = UnwrapSuccess(Definition(ZeroOrMore(Dot()), "All")("123456789"));
+            REQUIRE(res.node.size() == 1);
+            REQUIRE(res.remainder.empty());
+            REQUIRE(UnwrapNonTerminal(res.node[0]).children.size() == 9);
+            REQUIRE(UnwrapNonTerminal(res.node[0]).type == "All");
+            REQUIRE(UnwrapTerminal(UnwrapNonTerminal(res.node[0]).children[0]).value ==
+                    "1");
         }
         {
             auto parser =

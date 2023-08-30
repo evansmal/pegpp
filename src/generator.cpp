@@ -51,6 +51,10 @@ auto EmitExpression(const ast::Expression &expression, Collection &collection) -
                 }
                 return Alternative(parsers);
             }
+            else if constexpr (std::is_same_v<T, ast::Dot>)
+            {
+                return Dot();
+            }
             else if constexpr (std::is_same_v<T, ast::Literal>)
             {
                 return Literal(expression.value);

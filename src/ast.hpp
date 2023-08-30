@@ -17,6 +17,7 @@ using Expression = std::variant<Box<struct Sequence>,
                                 Box<struct ZeroOrMore>,
                                 Box<struct And>,
                                 Box<struct Not>,
+                                struct Dot,
                                 struct Range,
                                 struct Literal,
                                 struct Identifier>;
@@ -41,6 +42,11 @@ struct Range
     }
     std::string start;
     std::string end;
+};
+
+struct Dot
+{
+    Dot() = default;
 };
 
 struct Optional
