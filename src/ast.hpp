@@ -1,5 +1,7 @@
 #pragma once
 
+#include "box.hpp"
+
 #include <memory>
 #include <utility>
 #include <variant>
@@ -8,13 +10,16 @@
 namespace ast
 {
 
-struct Identifier;
-struct Literal;
-struct Range;
-struct Alternative;
-struct Sequence;
-
-using Expression = std::variant<Sequence, Alternative, Range, Literal, Identifier>;
+using Expression = std::variant<Box<struct Sequence>,
+                                Box<struct Alternative>,
+                                Box<struct Optional>,
+                                Box<struct OneOrMore>,
+                                Box<struct ZeroOrMore>,
+                                Box<struct And>,
+                                Box<struct Not>,
+                                struct Range,
+                                struct Literal,
+                                struct Identifier>;
 
 struct Identifier
 {
@@ -36,6 +41,36 @@ struct Range
     }
     std::string start;
     std::string end;
+};
+
+struct Optional
+{
+    Optional(Expression child) : child{std::move(child)} {}
+    Expression child;
+};
+
+struct ZeroOrMore
+{
+    ZeroOrMore(Expression child) : child{std::move(child)} {}
+    Expression child;
+};
+
+struct OneOrMore
+{
+    OneOrMore(Expression child) : child{std::move(child)} {}
+    Expression child;
+};
+
+struct And
+{
+    And(Expression child) : child{std::move(child)} {}
+    Expression child;
+};
+
+struct Not
+{
+    Not(Expression child) : child{std::move(child)} {}
+    Expression child;
 };
 
 struct Alternative
