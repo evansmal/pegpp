@@ -36,7 +36,12 @@ TEST_CASE("Generate and use collection", "[Generate]")
             const auto result = collection.Get("ZeroThenOne")("01");
             REQUIRE(UnwrapSuccess(result).remainder.empty());
             REQUIRE(UnwrapSuccess(result).node.size() == 1);
-            REQUIRE(UnwrapNonTerminal(UnwrapSuccess(result).node[0]).type == "ZeroThenOne");
+
+            const auto root = UnwrapNonTerminal(UnwrapSuccess(result).node[0]);
+            REQUIRE(root.type == "ZeroThenOne");
+            REQUIRE(root.children.size() == 2);
+            REQUIRE(UnwrapNonTerminal(root.children[0]).type == "Zero");
+            REQUIRE(UnwrapNonTerminal(root.children[1]).type == "One");
         }
     }
 }

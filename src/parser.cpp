@@ -17,16 +17,18 @@ void Dump(const Node &node, int level)
             if constexpr (std::is_same_v<T, Terminal>)
             {
                 Indent(level);
-                std::cout << "-> Terminal: \"" << arg.value << '"' << std::endl;
+                std::cout << "\"" << arg.value << "\"" << std::endl;
             }
             else if constexpr (std::is_same_v<T, NonTerminal>)
             {
                 Indent(level);
-                std::cout << "NonTerminal: " << arg.type << std::endl;
+                std::cout << "(" << arg.type << std::endl;
                 for (const auto &child : arg.children)
                 {
                     Dump(child, level + 1);
                 }
+                Indent(level);
+                std::cout << ")" << std::endl;
             }
         },
         node);
