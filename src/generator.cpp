@@ -3,10 +3,10 @@
 
 template <typename> inline constexpr bool AlwaysFalse = false;
 
-auto EmitExpression(const ast::Expression &expression, ParserMap &parser_map) -> Parser
+auto EmitExpression(const ast::Expression &expression, Collection &collection) -> Parser
 {
     return std::visit(
-        [&parser_map](auto &&expression)
+        [&collection](auto &&expression)
         {
             using T = std::decay_t<decltype(expression)>;
             if constexpr (std::is_same_v<T, ast::Sequence>)
@@ -15,9 +15,19 @@ auto EmitExpression(const ast::Expression &expression, ParserMap &parser_map) ->
                 parsers.reserve(expression.children.size());
                 for (const ast::Expression &child : expression.children)
                 {
-                    parsers.push_back(EmitExpression(child, parser_map));
+                    parsers.push_back(EmitExpression(child, collection));
                 }
                 return Sequence(parsers);
+            }
+            else if constexpr (std::is_same_v<T, ast::Alternative>)
+            {
+                std::vector<Parser> parsers;
+                parsers.reserve(expression.children.size());
+                for (const ast::Expression &child : expression.children)
+                {
+                    parsers.push_back(EmitExpression(child, collection));
+                }
+                return Alternative(parsers);
             }
             else if constexpr (std::is_same_v<T, ast::Literal>)
             {
@@ -27,7 +37,7 @@ auto EmitExpression(const ast::Expression &expression, ParserMap &parser_map) ->
             {
                 Parser parser = [&](const std::string &input)
                 {
-                    auto res = parser_map.at(expression.value)(input);
+                    auto res = collection.Get(expression.value)(input);
                     return res;
                 };
                 return parser;
@@ -44,14 +54,14 @@ auto EmitExpression(const ast::Expression &expression, ParserMap &parser_map) ->
         expression);
 }
 
-auto Generate(const ast::Grammar &grammar) -> ParserMap
+auto Generate(const ast::Grammar &grammar) -> Collection
 {
-    std::map<std::string, Parser> parsers;
+    Collection collection;
     for (const auto &definition : grammar.definitions)
     {
-        const auto expr = EmitExpression(definition.expression, parsers);
+        const auto expr = EmitExpression(definition.expression, collection);
         const auto def = Definition(expr, definition.identifier.value);
-        parsers[definition.identifier.value] = def;
+        collection.Add(definition.identifier.value, def);
     }
-    return parsers;
+    return collection;
 }

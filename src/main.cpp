@@ -8,15 +8,25 @@
 
 auto main() -> int
 {
-    auto g = ast::Grammar(
-        ast::Definition(ast::Identifier("Test"),
-                        ast::Sequence(ast::Identifier("Plus"), ast::Identifier("Minus"))),
-        ast::Definition(ast::Identifier("Plus"), ast::Literal("+")),
-        ast::Definition(ast::Identifier("Minus"), ast::Literal("-")));
+    auto g =
+        ast::Grammar(ast::Definition(ast::Identifier("Expression"),
+                                     ast::Sequence(ast::Identifier("Number"),
+                                                   ast::Identifier("BinaryOperand"),
+                                                   ast::Identifier("Number"))),
+                     ast::Definition(ast::Identifier("BinaryOperand"),
+                                     ast::Alternative(ast::Identifier("Plus"),
+                                                      ast::Identifier("Minus"))),
+                     ast::Definition(ast::Identifier("Plus"), ast::Literal("+")),
+                     ast::Definition(ast::Identifier("Minus"), ast::Literal("-")),
+                     ast::Definition(ast::Identifier("Number"), ast::Range("0", "9")));
 
-    const auto parser = Generate(g);
+    std::cout << "Created grammar" << std::endl;
 
-    const auto result = parser.at("Test")("+-");
+    const auto collection = Generate(g);
+
+    std::cout << "Created collection" << std::endl;
+
+    const auto result = collection.Get("Expression")("1+2");
     if (std::holds_alternative<Success>(result))
     {
         std::cout << "Parser success!" << std::endl;

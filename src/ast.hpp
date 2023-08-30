@@ -11,9 +11,10 @@ namespace ast
 struct Identifier;
 struct Literal;
 struct Range;
+struct Alternative;
 struct Sequence;
 
-using Expression = std::variant<Sequence, Range, Literal, Identifier>;
+using Expression = std::variant<Sequence, Alternative, Range, Literal, Identifier>;
 
 struct Identifier
 {
@@ -35,6 +36,15 @@ struct Range
     }
     std::string start;
     std::string end;
+};
+
+struct Alternative
+{
+    template <typename... Children>
+    Alternative(Children &&...children) : children{children...}
+    {
+    }
+    std::vector<Expression> children;
 };
 
 struct Sequence
