@@ -2,6 +2,7 @@
 #include "combinator.hpp"
 #include "generator.hpp"
 #include "parser.hpp"
+#include "grammar.hpp"
 
 #include <iostream>
 #include <map>
@@ -21,6 +22,8 @@ auto main() -> int
         ast::Definition(ast::Identifier("Number"), ast::Range("0", "9")));
 
     std::cout << "Created grammar" << std::endl;
+
+    std::cout << ast::ToString(GRAMMAR) << std::endl;
 
     const auto collection = Generate(g);
 

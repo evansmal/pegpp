@@ -51,6 +51,22 @@ auto EmitExpression(const ast::Expression &expression, Collection &collection) -
                 }
                 return Alternative(parsers);
             }
+            else if constexpr (std::is_same_v<T, ast::Class>)
+            {
+                const ast::Class &cls = expression;
+
+                std::vector<Parser> parsers;
+                parsers.reserve(cls.literals.size() + cls.ranges.size());
+                for (const auto &literal : cls.literals)
+                {
+                    parsers.push_back(EmitExpression(literal, collection));
+                }
+                for (const auto &range : cls.ranges)
+                {
+                    parsers.push_back(EmitExpression(range, collection));
+                }
+                return Alternative(parsers);
+            }
             else if constexpr (std::is_same_v<T, ast::Dot>)
             {
                 return Dot();

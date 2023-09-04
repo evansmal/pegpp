@@ -17,6 +17,7 @@ using Expression = std::variant<Box<struct Sequence>,
                                 Box<struct ZeroOrMore>,
                                 Box<struct And>,
                                 Box<struct Not>,
+                                struct Class,
                                 struct Dot,
                                 struct Range,
                                 struct Literal,
@@ -42,6 +43,16 @@ struct Range
     }
     std::string start;
     std::string end;
+};
+
+struct Class
+{
+    Class(std::vector<Range> ranges, std::vector<Literal> literals)
+        : ranges{std::move(ranges)}, literals{std::move(literals)}
+    {
+    }
+    std::vector<Range> ranges;
+    std::vector<Literal> literals;
 };
 
 struct Dot
@@ -115,5 +126,7 @@ struct Grammar
     }
     std::vector<Definition> definitions;
 };
+
+auto ToString(const Grammar &grammar) -> std::string;
 
 } // namespace ast
