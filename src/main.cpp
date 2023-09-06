@@ -1,8 +1,8 @@
 #include "ast.hpp"
 #include "combinator.hpp"
 #include "generator.hpp"
-#include "parser.hpp"
 #include "grammar.hpp"
+#include "parser.hpp"
 
 #include <iostream>
 #include <map>
@@ -23,7 +23,28 @@ auto main() -> int
 
     std::cout << "Created grammar" << std::endl;
 
-    std::cout << ast::ToString(GRAMMAR) << std::endl;
+    const auto peg = Generate(GRAMMAR);
+
+    const std::string grammar = "Expression <- Number BinaryOperand Number\n"
+                                "BinaryOperand <- Plus / Minus\n"
+                                "Plus <- '+'\n"
+                                "Minus <- '-'\n"
+                                "Number <- [0-9]\n";
+
+    const auto parse = peg.Get("Grammar")(grammar);
+    if (std::holds_alternative<Success>(parse))
+    {
+        std::cout << "Parser success!" << std::endl;
+        const auto &success = std::get<Success>(parse);
+        for (const auto &node : success.node)
+        {
+            Dump(node);
+        }
+    }
+    else
+    {
+        std::cout << "Parser failure!" << std::endl;
+    }
 
     const auto collection = Generate(g);
 
