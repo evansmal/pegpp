@@ -2,6 +2,7 @@
 
 #include "box.hpp"
 
+#include <concepts>
 #include <memory>
 #include <utility>
 #include <variant>

@@ -27,6 +27,12 @@ struct Collection
                                  " from collection but it doens't exist");
     }
 
+    [[nodiscard]] auto Parse(const std::string &name, const std::string &source) const
+        -> Result
+    {
+        return Get(name)(source);
+    }
+
   private:
     std::map<std::string, Parser> storage;
 };

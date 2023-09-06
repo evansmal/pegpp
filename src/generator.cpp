@@ -19,27 +19,30 @@ auto EmitExpression(const ast::Expression &expression, Collection &collection) -
                 {
                     parsers.push_back(EmitExpression(child, collection));
                 }
-                return Sequence(parsers);
+                return combinator::Sequence(parsers);
             }
             else if constexpr (std::is_same_v<T, Box<ast::Optional>>)
             {
-                return Optional(EmitExpression(expression->child, collection));
+                return combinator::Optional(
+                    EmitExpression(expression->child, collection));
             }
             else if constexpr (std::is_same_v<T, Box<ast::ZeroOrMore>>)
             {
-                return ZeroOrMore(EmitExpression(expression->child, collection));
+                return combinator::ZeroOrMore(
+                    EmitExpression(expression->child, collection));
             }
             else if constexpr (std::is_same_v<T, Box<ast::OneOrMore>>)
             {
-                return OneOrMore(EmitExpression(expression->child, collection));
+                return combinator::OneOrMore(
+                    EmitExpression(expression->child, collection));
             }
             else if constexpr (std::is_same_v<T, Box<ast::And>>)
             {
-                return And(EmitExpression(expression->child, collection));
+                return combinator::And(EmitExpression(expression->child, collection));
             }
             else if constexpr (std::is_same_v<T, Box<ast::Not>>)
             {
-                return Not(EmitExpression(expression->child, collection));
+                return combinator::Not(EmitExpression(expression->child, collection));
             }
             else if constexpr (std::is_same_v<T, Box<ast::Alternative>>)
             {
@@ -49,7 +52,7 @@ auto EmitExpression(const ast::Expression &expression, Collection &collection) -
                 {
                     parsers.push_back(EmitExpression(child, collection));
                 }
-                return Alternative(parsers);
+                return combinator::Alternative(parsers);
             }
             else if constexpr (std::is_same_v<T, ast::Class>)
             {
@@ -65,15 +68,15 @@ auto EmitExpression(const ast::Expression &expression, Collection &collection) -
                 {
                     parsers.push_back(EmitExpression(range, collection));
                 }
-                return Alternative(parsers);
+                return combinator::Alternative(parsers);
             }
             else if constexpr (std::is_same_v<T, ast::Dot>)
             {
-                return Dot();
+                return combinator::Dot();
             }
             else if constexpr (std::is_same_v<T, ast::Literal>)
             {
-                return Literal(expression.value);
+                return combinator::Literal(expression.value);
             }
             else if constexpr (std::is_same_v<T, ast::Identifier>)
             {
@@ -86,7 +89,7 @@ auto EmitExpression(const ast::Expression &expression, Collection &collection) -
             }
             else if constexpr (std::is_same_v<T, ast::Range>)
             {
-                return Range(expression.start, expression.end);
+                return combinator::Range(expression.start, expression.end);
             }
             else
             {
@@ -102,7 +105,7 @@ auto Generate(const ast::Grammar &grammar) -> Collection
     for (const auto &definition : grammar.definitions)
     {
         const auto expr = EmitExpression(definition.expression, collection);
-        const auto def = Definition(expr, definition.identifier.value);
+        const auto def = combinator::Definition(expr, definition.identifier.value);
         collection.Add(definition.identifier.value, def);
     }
     return collection;

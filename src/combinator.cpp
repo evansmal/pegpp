@@ -3,6 +3,9 @@
 
 #include <stdexcept>
 
+namespace combinator
+{
+
 auto Literal(const std::string &value) -> Parser
 {
     return [value](const std::string &input)
@@ -217,3 +220,5 @@ auto Definition(const Parser &parser, const std::string &type) -> Parser
         return result;
     };
 }
+
+} // namespace combinator

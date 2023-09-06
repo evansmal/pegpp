@@ -7,31 +7,11 @@
 #include <iostream>
 #include <map>
 
-auto main() -> int
+auto CreatePegParser(const std::string &grammar) -> void
 {
-    auto g = ast::Grammar(
-        ast::Definition(ast::Identifier("Expression"),
-                        Box(ast::Sequence(ast::Identifier("Number"),
-                                          ast::Identifier("BinaryOperand"),
-                                          ast::Identifier("Number")))),
-        ast::Definition(
-            ast::Identifier("BinaryOperand"),
-            Box(ast::Alternative(ast::Identifier("Plus"), ast::Identifier("Minus")))),
-        ast::Definition(ast::Identifier("Plus"), ast::Literal("+")),
-        ast::Definition(ast::Identifier("Minus"), ast::Literal("-")),
-        ast::Definition(ast::Identifier("Number"), ast::Range("0", "9")));
-
-    std::cout << "Created grammar" << std::endl;
-
-    const auto peg = Generate(GRAMMAR);
-
-    const std::string grammar = "Expression <- Number BinaryOperand Number\n"
-                                "BinaryOperand <- Plus / Minus\n"
-                                "Plus <- '+'\n"
-                                "Minus <- '-'\n"
-                                "Number <- [0-9]\n";
-
-    const auto parse = peg.Get("Grammar")(grammar);
+    const auto peg_grammar = GetPegGrammarAST();
+    const auto peg = Generate(peg_grammar);
+    const auto parse = peg.Parse("Grammar", grammar);
     if (std::holds_alternative<Success>(parse))
     {
         std::cout << "Parser success!" << std::endl;
@@ -45,8 +25,32 @@ auto main() -> int
     {
         std::cout << "Parser failure!" << std::endl;
     }
+}
 
-    const auto collection = Generate(g);
+auto main() -> int
+{
+    using namespace ast;
+
+    const std::string grammar = "Expression <- Number BinaryOperand Number\n"
+                                "BinaryOperand <- Plus / Minus\n"
+                                "Plus <- '+'\n"
+                                "Minus <- '-'\n"
+                                "Number <- [0-9]\n";
+    CreatePegParser(grammar);
+
+    auto grammar_ast =
+        Grammar(Definition(Identifier("Expression"),
+                           Box(Sequence(Identifier("Number"),
+                                        Identifier("BinaryOperand"),
+                                        Identifier("Number")))),
+                Definition(Identifier("BinaryOperand"),
+                           Box(Alternative(Identifier("Plus"), Identifier("Minus")))),
+                Definition(Identifier("Plus"), Literal("+")),
+                Definition(Identifier("Minus"), Literal("-")),
+                Definition(Identifier("Number"), Range("0", "9")));
+
+    std::cout << "Created grammar" << std::endl;
+    const auto collection = Generate(grammar_ast);
 
     std::cout << "Created collection" << std::endl;
 

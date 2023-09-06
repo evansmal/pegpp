@@ -2,6 +2,9 @@
 
 #include "parser.hpp"
 
+namespace combinator
+{
+
 auto Literal(const std::string &value) -> Parser;
 
 auto Range(const std::string &start, const std::string &end) -> Parser;
@@ -23,3 +26,5 @@ auto Not(const Parser &parser) -> Parser;
 auto Dot() -> Parser;
 
 auto Definition(const Parser &parser, const std::string &type) -> Parser;
+
+}; // namespace combinator

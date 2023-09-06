@@ -4,6 +4,8 @@
 
 #include "combinator.hpp"
 
+using namespace combinator;
+
 TEST_CASE("Literals are parsed", "[Literal]")
 {
     SECTION("Handle single values")
